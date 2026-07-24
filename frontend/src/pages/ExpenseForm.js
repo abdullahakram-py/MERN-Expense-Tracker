@@ -5,7 +5,9 @@ function ExpenseForm({ addTransaction }) {
 
     const [expenseInfo, setExpenseInfo] = useState({
         amount: '',
-        text: ''
+        text: '',
+        category: '',
+        date: ''
     })
 
     const handleChange = (e) => {
@@ -17,13 +19,13 @@ function ExpenseForm({ addTransaction }) {
 
     const addExpenses = (e) => {
         e.preventDefault();
-        const { amount, text } = expenseInfo;
-        if (!amount || !text) {
-            handleError('Please add Expense Details');
+        const { amount, text, category, date } = expenseInfo;
+        if (!amount || !text || !category || !date) {
+            handleError('Please fill all expense fields (name, amount, category, date)');
             return;
         }
-        addTransaction(expenseInfo);
-        setExpenseInfo({ amount: '', text: '' })
+        addTransaction({ ...expenseInfo, amount: Number(amount) });
+        setExpenseInfo({ amount: '', text: '', category: '', date: '' })
     }
 
     return (
@@ -48,6 +50,26 @@ function ExpenseForm({ addTransaction }) {
                         name='amount'
                         placeholder='Enter your Amount...'
                         value={expenseInfo.amount}
+                    />
+                </div>
+                <div>
+                    <label htmlFor='category'>Category</label>
+                    <select name='category' value={expenseInfo.category} onChange={handleChange}>
+                        <option value=''>Select category</option>
+                        <option value='Food'>Food</option>
+                        <option value='Transportation'>Transportation</option>
+                        <option value='Healthcare'>Healthcare</option>
+                        <option value='Shopping'>Shopping</option>
+                        <option value='Entertainment'>Entertainment</option>
+                    </select>
+                </div>
+                <div>
+                    <label htmlFor='date'>Date</label>
+                    <input
+                        onChange={handleChange}
+                        type='date'
+                        name='date'
+                        value={expenseInfo.date}
                     />
                 </div>
                 <button type='submit'>Add Expense</button>

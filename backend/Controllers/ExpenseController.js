@@ -4,9 +4,34 @@ const addTransaction = async (req, res) => {
     const { _id } = req.user;
     console.log(_id, req.body)
     try {
+        // Validate required fields
+        const { text, amount, category, date } = req.body;
+        const allowedCategories = ['Food', 'Transportation', 'Healthcare', 'Shopping', 'Entertainment'];
+        if (!text || amount === undefined || !category || !date) {
+            return res.status(400).json({ message: 'Missing required expense fields', success: false });
+        }
+        if (!allowedCategories.includes(category)) {
+            return res.status(400).json({ message: 'Invalid category', success: false });
+        }
+        const parsedAmount = Number(amount);
+        if (Number.isNaN(parsedAmount)) {
+            return res.status(400).json({ message: 'Invalid amount', success: false });
+        }
+        const parsedDate = new Date(date);
+        if (Number.isNaN(parsedDate.getTime())) {
+            return res.status(400).json({ message: 'Invalid date', success: false });
+        }
+
+        const expense = {
+            text,
+            amount: parsedAmount,
+            category,
+            date: parsedDate
+        }
+
         const userData = await UserModel.findByIdAndUpdate(
             _id,
-            { $push: { expenses: req.body } },
+            { $push: { expenses: expense } },
             { new: true } // For Returning the updated documents
         )
         res.status(200)

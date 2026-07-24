@@ -9,6 +9,7 @@ const ExpenseTable = ({ expenses, deleteExpens }) => {
                     <button className="delete-button" onClick={() =>
                         deleteExpens(expense._id)}>X</button>
                     <div className="expense-description">{expense.text}</div>
+                    <div className="expense-meta">{expense.category || 'Uncategorized'} • {expense.date ? new Date(expense.date).toLocaleDateString() : ''}</div>
                     <div
                         className="expense-amount"
                         style={{ color: expense.amount > 0 ? '#27ae60' : '#c0392b' }}
