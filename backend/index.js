@@ -11,6 +11,8 @@ const cors = require('cors');
 const AuthRouter = require('./Routes/AuthRouter');
 const ProductRouter = require('./Routes/ProductRouter');
 const ExpenseRouter = require('./Routes/ExpenseRouter');
+const BudgetRouter = require('./Routes/BudgetRouter');
+const AnalyticsRouter = require('./Routes/AnalyticsRouter');
 const ensureAuthenticated = require('./Middlewares/Auth');
 
 require('dotenv').config();
@@ -26,6 +28,8 @@ app.use(cors());
 app.use('/auth', AuthRouter);
 app.use('/products', ProductRouter);
 app.use('/expenses', ensureAuthenticated, ExpenseRouter)
+app.use('/budgets', ensureAuthenticated, BudgetRouter);
+app.use('/analytics', ensureAuthenticated, AnalyticsRouter);
 
 
 app.listen(PORT, () => {

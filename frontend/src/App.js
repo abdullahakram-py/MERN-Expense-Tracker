@@ -3,6 +3,8 @@ import './App.css';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Home from './pages/Home';
+import Budget from './pages/Budget';
+import Analytics from './pages/Analytics';
 import { useState } from 'react';
 import RefrshHandler from './RefrshHandler';
 
@@ -21,6 +23,8 @@ function App() {
         <Route path='/login' element={<Login />} />
         <Route path='/signup' element={<Signup />} />
         <Route path='/home' element={<PrivateRoute element={<Home />} />} />
+        <Route path='/budget' element={<PrivateRoute element={<Budget />} />} />
+        <Route path='/analytics' element={<PrivateRoute element={<Analytics />} />} />
       </Routes>
     </div>
   );

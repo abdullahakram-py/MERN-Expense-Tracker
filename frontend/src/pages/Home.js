@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { APIUrl, handleError, handleSuccess } from '../utils';
 import { ToastContainer } from 'react-toastify';
@@ -115,11 +116,22 @@ function Home() {
     }, [])
 
     return (
-        <div>
-            <div className='user-section'>
-                <h1>Welcome {loggedInUser}</h1>
-                <button onClick={handleLogout}>Logout</button>
-            </div>
+        <div className='app-layout'>
+            <aside className='sidebar'>
+                <h3>Menu</h3>
+                <ul>
+                    <li><Link to="/home">Dashboard</Link></li>
+                    <li><Link to="/budget">Budget</Link></li>
+                    <li><Link to="/analytics">Analytics</Link></li>
+                </ul>
+                <div style={{ marginTop: 20 }}>
+                    <button onClick={handleLogout}>Logout</button>
+                </div>
+            </aside>
+            <main className='main-content'>
+                <div className='user-section'>
+                    <h1>Welcome {loggedInUser}</h1>
+                </div>
             <ExpenseDetails
                 incomeAmt={incomeAmt}
                 expenseAmt={expenseAmt}
@@ -133,6 +145,7 @@ function Home() {
                 deleteExpens={deleteExpens}
             />
             <ToastContainer />
+            </main>
         </div>
     )
 }
