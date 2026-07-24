@@ -130,7 +130,7 @@ Open a Pull Request
 ```
 👨‍💻 Developer
 <div align="center">
-Subham Nayak
+Abdullah
 Full Stack Developer
 </div>
 
