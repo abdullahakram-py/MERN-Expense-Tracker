@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const UserModel = require('../Models/User');
 
 // Helper to parse date range
@@ -13,10 +14,10 @@ const dailyTotals = async (req, res) => {
         const { _id } = req.user;
         const { startDate, endDate } = parseRange(req.query);
         const pipeline = [
-            { $match: { _id: require('mongoose').Types.ObjectId(_id) } },
-            { $unwind: '$expenses' },
-            { $match: { 'expenses.date': { $gte: startDate, $lte: endDate } } },
-            { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$expenses.date' } }, total: { $sum: '$expenses.amount' } } },
+            { $match: { _id: mongoose.Types.ObjectId(_id) } },
+            { $unwind: '$transactions' },
+            { $match: { 'transactions.type': 'expense', 'transactions.date': { $gte: startDate, $lte: endDate } } },
+            { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$transactions.date' } }, total: { $sum: '$transactions.amount' } } },
             { $sort: { '_id': 1 } }
         ];
         const result = await UserModel.aggregate(pipeline);
@@ -31,11 +32,11 @@ const weeklyTotals = async (req, res) => {
         const { _id } = req.user;
         const { startDate, endDate } = parseRange(req.query);
         const pipeline = [
-            { $match: { _id: require('mongoose').Types.ObjectId(_id) } },
-            { $unwind: '$expenses' },
-            { $match: { 'expenses.date': { $gte: startDate, $lte: endDate } } },
-            { $group: { _id: { $isoWeekYear: '$expenses.date', week: { $isoWeek: '$expenses.date' } }, total: { $sum: '$expenses.amount' } } },
-            { $sort: { '_id.week': 1 } }
+            { $match: { _id: mongoose.Types.ObjectId(_id) } },
+            { $unwind: '$transactions' },
+            { $match: { 'transactions.type': 'expense', 'transactions.date': { $gte: startDate, $lte: endDate } } },
+            { $group: { _id: { year: { $isoWeekYear: '$transactions.date' }, week: { $isoWeek: '$transactions.date' } }, total: { $sum: '$transactions.amount' } } },
+            { $sort: { '_id.year': 1, '_id.week': 1 } }
         ];
         const result = await UserModel.aggregate(pipeline);
         return res.status(200).json({ message: 'Weekly totals', success: true, data: result });
@@ -49,10 +50,10 @@ const monthlyTotals = async (req, res) => {
         const { _id } = req.user;
         const { startDate, endDate } = parseRange(req.query);
         const pipeline = [
-            { $match: { _id: require('mongoose').Types.ObjectId(_id) } },
-            { $unwind: '$expenses' },
-            { $match: { 'expenses.date': { $gte: startDate, $lte: endDate } } },
-            { $group: { _id: { year: { $year: '$expenses.date' }, month: { $month: '$expenses.date' } }, total: { $sum: '$expenses.amount' } } },
+            { $match: { _id: mongoose.Types.ObjectId(_id) } },
+            { $unwind: '$transactions' },
+            { $match: { 'transactions.type': 'expense', 'transactions.date': { $gte: startDate, $lte: endDate } } },
+            { $group: { _id: { year: { $year: '$transactions.date' }, month: { $month: '$transactions.date' } }, total: { $sum: '$transactions.amount' } } },
             { $sort: { '_id.year': 1, '_id.month': 1 } }
         ];
         const result = await UserModel.aggregate(pipeline);
@@ -67,10 +68,10 @@ const categoryTotals = async (req, res) => {
         const { _id } = req.user;
         const { startDate, endDate } = parseRange(req.query);
         const pipeline = [
-            { $match: { _id: require('mongoose').Types.ObjectId(_id) } },
-            { $unwind: '$expenses' },
-            { $match: { 'expenses.date': { $gte: startDate, $lte: endDate } } },
-            { $group: { _id: '$expenses.category', total: { $sum: '$expenses.amount' }, count: { $sum: 1 } } },
+            { $match: { _id: mongoose.Types.ObjectId(_id) } },
+            { $unwind: '$transactions' },
+            { $match: { 'transactions.type': 'expense', 'transactions.date': { $gte: startDate, $lte: endDate } } },
+            { $group: { _id: '$transactions.category', total: { $sum: '$transactions.amount' }, count: { $sum: 1 } } },
             { $sort: { total: -1 } }
         ];
         const result = await UserModel.aggregate(pipeline);
@@ -85,17 +86,17 @@ const summary = async (req, res) => {
         const { _id } = req.user;
         const { startDate, endDate } = parseRange(req.query);
         const pipeline = [
-            { $match: { _id: require('mongoose').Types.ObjectId(_id) } },
-            { $unwind: '$expenses' },
-            { $match: { 'expenses.date': { $gte: startDate, $lte: endDate } } },
-            { $group: { _id: null, totalExpenses: { $sum: '$expenses.amount' }, txCount: { $sum: 1 } } }
+            { $match: { _id: mongoose.Types.ObjectId(_id) } },
+            { $unwind: '$transactions' },
+            { $match: { 'transactions.type': 'expense', 'transactions.date': { $gte: startDate, $lte: endDate } } },
+            { $group: { _id: null, totalExpenses: { $sum: '$transactions.amount' }, txCount: { $sum: 1 } } }
         ];
         const res1 = await UserModel.aggregate(pipeline);
         const categoryPipeline = [
-            { $match: { _id: require('mongoose').Types.ObjectId(_id) } },
-            { $unwind: '$expenses' },
-            { $match: { 'expenses.date': { $gte: startDate, $lte: endDate } } },
-            { $group: { _id: '$expenses.category', total: { $sum: '$expenses.amount' } } },
+            { $match: { _id: mongoose.Types.ObjectId(_id) } },
+            { $unwind: '$transactions' },
+            { $match: { 'transactions.type': 'expense', 'transactions.date': { $gte: startDate, $lte: endDate } } },
+            { $group: { _id: '$transactions.category', total: { $sum: '$transactions.amount' } } },
             { $sort: { total: -1 } },
             { $limit: 1 }
         ];

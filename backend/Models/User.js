@@ -15,7 +15,7 @@ const UserSchema = new Schema({
         type: String,
         required: true,
     },
-    expenses: [
+    transactions: [
         {
             text: {
                 type: String,
@@ -25,9 +25,14 @@ const UserSchema = new Schema({
                 type: Number,
                 required: true
             },
-            category: {
+            type: {
                 type: String,
-                required: true
+                enum: ['expense', 'income'],
+                required: true,
+                default: 'expense'
+            },
+            category: {
+                type: String
             },
             date: {
                 type: Date,

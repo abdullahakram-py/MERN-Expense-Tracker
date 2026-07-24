@@ -4,13 +4,19 @@ const addTransaction = async (req, res) => {
     const { _id } = req.user;
     console.log(_id, req.body)
     try {
-        // Validate required fields
-        const { text, amount, category, date } = req.body;
+        const { text, amount, category, date, type } = req.body;
         const allowedCategories = ['Food', 'Transportation', 'Healthcare', 'Shopping', 'Entertainment'];
-        if (!text || amount === undefined || !category || !date) {
-            return res.status(400).json({ message: 'Missing required expense fields', success: false });
+        const allowedTypes = ['expense', 'income'];
+        if (!text || amount === undefined || !type || !date) {
+            return res.status(400).json({ message: 'Missing required transaction fields', success: false });
         }
-        if (!allowedCategories.includes(category)) {
+        if (!allowedTypes.includes(type)) {
+            return res.status(400).json({ message: 'Invalid transaction type', success: false });
+        }
+        if (type === 'expense' && !category) {
+            return res.status(400).json({ message: 'Category is required for expenses', success: false });
+        }
+        if (category && type === 'expense' && !allowedCategories.includes(category)) {
             return res.status(400).json({ message: 'Invalid category', success: false });
         }
         const parsedAmount = Number(amount);
@@ -22,23 +28,24 @@ const addTransaction = async (req, res) => {
             return res.status(400).json({ message: 'Invalid date', success: false });
         }
 
-        const expense = {
+        const transaction = {
             text,
             amount: parsedAmount,
-            category,
+            type,
+            category: category || '',
             date: parsedDate
         }
 
         const userData = await UserModel.findByIdAndUpdate(
             _id,
-            { $push: { expenses: expense } },
+            { $push: { transactions: transaction } },
             { new: true } // For Returning the updated documents
         )
         res.status(200)
             .json({
-                message: "Expense added successfully",
+                message: "Transaction added successfully",
                 success: true,
-                data: userData?.expenses
+                data: userData?.transactions
             })
     } catch (err) {
         return res.status(500).json({
@@ -53,12 +60,12 @@ const getAllTransactions = async (req, res) => {
     const { _id } = req.user;
     console.log(_id, req.body)
     try {
-        const userData = await UserModel.findById(_id).select('expenses');
+        const userData = await UserModel.findById(_id).select('transactions');
         res.status(200)
             .json({
-                message: "Fetched Expenses successfully",
+                message: "Fetched transactions successfully",
                 success: true,
-                data: userData?.expenses
+                data: userData?.transactions
             })
     } catch (err) {
         return res.status(500).json({
@@ -71,18 +78,18 @@ const getAllTransactions = async (req, res) => {
 
 const deleteTransaction = async (req, res) => {
     const { _id } = req.user;
-    const expenseId = req.params.expenseId;
+    const transactionId = req.params.expenseId;
     try {
         const userData = await UserModel.findByIdAndUpdate(
             _id,
-            { $pull: { expenses: { _id: expenseId } } },
+            { $pull: { transactions: { _id: transactionId } } },
             { new: true } // For Returning the updated documents
         )
         res.status(200)
             .json({
-                message: "Expense Deleted successfully",
+                message: "Transaction deleted successfully",
                 success: true,
-                data: userData?.expenses
+                data: userData?.transactions
             })
     } catch (err) {
         return res.status(500).json({
